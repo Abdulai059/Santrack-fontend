@@ -2,7 +2,7 @@
 
 export default function LocationSlugs({ locations, activeLocation, onSelect }) {
   return (
-    <aside className="w-55 shrink-0 bg-white border-r border-gray-200 flex flex-col overflow-y-auto">
+    <aside className="w-64 shrink-0 bg-white border-r border-gray-200 flex flex-col overflow-y-auto">
       <div className="px-4 pt-4 pb-3 border-b border-gray-200">
         <span className="font-mono text-xs tracking-[0.22em] uppercase text-gray-900">
           Location Slugs
