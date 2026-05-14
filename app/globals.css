@@ -104,3 +104,29 @@ body {
   color: var(--text-primary);
   font-family: var(--font-geist-sans), "DM Sans", sans-serif;
 }
+
+/* Mobile touch improvements */
+@media (max-width: 768px) {
+  /* Improve tap targets */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Smooth scrolling on mobile */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent text selection on buttons */
+  button {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+}
+
+/* Custom utility classes */
+.active\:scale-98:active {
+  transform: scale(0.98);
+}

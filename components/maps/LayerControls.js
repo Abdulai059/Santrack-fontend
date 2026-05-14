@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 const layers = [
   {
     key: "infrastructure",
@@ -66,71 +68,169 @@ const layers = [
 ];
 
 export default function LayerControls({ activeLayers, onToggle, fieldWorkerCount = 0 }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const activeCount = Object.values(activeLayers).filter(Boolean).length;
+
   return (
-    <div className="absolute top-3 right-3 z-[500] bg-white/95 backdrop-blur-sm border border-stone-200 rounded-xl shadow-lg overflow-hidden w-52">
-      <div className="px-3 py-2.5 border-b border-stone-100">
-        <span className="font-mono text-[9px] tracking-[0.2em] text-stone-400 uppercase">
-          Map Layers
+    <>
+      {/* Mobile: Compact button */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="md:hidden absolute top-2 right-2 z-[500] bg-white/95 backdrop-blur-sm border border-stone-200 rounded-lg shadow-lg px-3 py-2 flex items-center gap-2 active:scale-95 transition-transform"
+      >
+        <svg className="w-4 h-4 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+        <span className="text-xs font-semibold text-stone-700">Layers</span>
+        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-1.5 py-0.5">
+          {activeCount}
         </span>
-      </div>
+      </button>
 
-      <div className="p-2 flex flex-col gap-1">
-        {layers.map((layer) => {
-          const isOn = activeLayers[layer.key];
-          return (
+      {/* Mobile: Expanded panel */}
+      {isExpanded && (
+        <div className="md:hidden absolute inset-x-2 top-2 z-[501] bg-white/95 backdrop-blur-sm border border-stone-200 rounded-xl shadow-xl overflow-hidden">
+          <div className="flex items-center justify-between px-3 py-2.5 border-b border-stone-100">
+            <span className="font-mono text-[9px] tracking-[0.2em] text-stone-400 uppercase font-semibold">
+              Map Layers
+            </span>
             <button
-              key={layer.key}
-              onClick={() => onToggle(layer.key)}
-              className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all duration-150 ${
-                isOn ? "bg-stone-50" : "hover:bg-stone-50 opacity-50"
-              }`}
+              onClick={() => setIsExpanded(false)}
+              className="p-1 hover:bg-stone-100 rounded-lg transition-colors"
             >
-              {/* Color dot / toggle */}
-              <span
-                className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all"
-                style={{
-                  background: isOn ? `${layer.color}20` : "#f3f4f6",
-                  color: isOn ? layer.color : "#9ca3af",
-                  border: `1px solid ${isOn ? `${layer.color}40` : "#e5e7eb"}`,
-                }}
-              >
-                {layer.icon}
-              </span>
+              <svg className="w-4 h-4 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-semibold text-stone-700 leading-none">
-                    {layer.label}
+          <div className="p-2 flex flex-col gap-1 max-h-[60vh] overflow-y-auto">
+            {layers.map((layer) => {
+              const isOn = activeLayers[layer.key];
+              return (
+                <button
+                  key={layer.key}
+                  onClick={() => onToggle(layer.key)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left transition-all duration-150 active:scale-98 ${
+                    isOn ? "bg-stone-50" : "hover:bg-stone-50 opacity-50"
+                  }`}
+                >
+                  {/* Color dot / toggle */}
+                  <span
+                    className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 transition-all"
+                    style={{
+                      background: isOn ? `${layer.color}20` : "#f3f4f6",
+                      color: isOn ? layer.color : "#9ca3af",
+                      border: `1.5px solid ${isOn ? `${layer.color}40` : "#e5e7eb"}`,
+                    }}
+                  >
+                    {layer.icon}
                   </span>
-                  {/* Live badge for field workers */}
-                  {layer.key === "fieldWorkers" && fieldWorkerCount > 0 && (
-                    <span className="flex items-center gap-0.5 text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-1.5 py-0.5 leading-none">
-                      <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                      {fieldWorkerCount}
-                    </span>
-                  )}
-                </div>
-                <span className="text-[10px] text-stone-400 leading-none mt-0.5 block truncate">
-                  {layer.description}
-                </span>
-              </div>
 
-              {/* Toggle pill */}
-              <span
-                className={`w-7 h-4 rounded-full shrink-0 transition-colors duration-200 relative ${
-                  isOn ? "bg-emerald-500" : "bg-stone-200"
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className="text-sm font-semibold text-stone-700 leading-none">
+                        {layer.label}
+                      </span>
+                      {/* Live badge for field workers */}
+                      {layer.key === "fieldWorkers" && fieldWorkerCount > 0 && (
+                        <span className="flex items-center gap-0.5 text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-1.5 py-0.5 leading-none">
+                          <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                          {fieldWorkerCount}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-stone-400 leading-none block truncate">
+                      {layer.description}
+                    </span>
+                  </div>
+
+                  {/* Toggle pill */}
+                  <span
+                    className={`w-8 h-5 rounded-full shrink-0 transition-colors duration-200 relative ${
+                      isOn ? "bg-emerald-500" : "bg-stone-200"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                        isOn ? "translate-x-3.5" : "translate-x-0.5"
+                      }`}
+                    />
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Desktop: Always visible panel */}
+      <div className="hidden md:block absolute top-3 right-3 z-[500] bg-white/95 backdrop-blur-sm border border-stone-200 rounded-xl shadow-lg overflow-hidden w-52">
+        <div className="px-3 py-2.5 border-b border-stone-100">
+          <span className="font-mono text-[9px] tracking-[0.2em] text-stone-400 uppercase">
+            Map Layers
+          </span>
+        </div>
+
+        <div className="p-2 flex flex-col gap-1">
+          {layers.map((layer) => {
+            const isOn = activeLayers[layer.key];
+            return (
+              <button
+                key={layer.key}
+                onClick={() => onToggle(layer.key)}
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all duration-150 ${
+                  isOn ? "bg-stone-50" : "hover:bg-stone-50 opacity-50"
                 }`}
               >
+                {/* Color dot / toggle */}
                 <span
-                  className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                    isOn ? "translate-x-3.5" : "translate-x-0.5"
+                  className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all"
+                  style={{
+                    background: isOn ? `${layer.color}20` : "#f3f4f6",
+                    color: isOn ? layer.color : "#9ca3af",
+                    border: `1px solid ${isOn ? `${layer.color}40` : "#e5e7eb"}`,
+                  }}
+                >
+                  {layer.icon}
+                </span>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-stone-700 leading-none">
+                      {layer.label}
+                    </span>
+                    {/* Live badge for field workers */}
+                    {layer.key === "fieldWorkers" && fieldWorkerCount > 0 && (
+                      <span className="flex items-center gap-0.5 text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-1.5 py-0.5 leading-none">
+                        <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                        {fieldWorkerCount}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-stone-400 leading-none mt-0.5 block truncate">
+                    {layer.description}
+                  </span>
+                </div>
+
+                {/* Toggle pill */}
+                <span
+                  className={`w-7 h-4 rounded-full shrink-0 transition-colors duration-200 relative ${
+                    isOn ? "bg-emerald-500" : "bg-stone-200"
                   }`}
-                />
-              </span>
-            </button>
-          );
-        })}
+                >
+                  <span
+                    className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                      isOn ? "translate-x-3.5" : "translate-x-0.5"
+                    }`}
+                  />
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

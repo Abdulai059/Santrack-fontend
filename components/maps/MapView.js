@@ -128,21 +128,21 @@ export default function MapView({
   return (
     <div className="flex-1 relative overflow-hidden isolate z-0">
 
-      {/* Active zone badge */}
+      {/* Active zone badge - Smaller on mobile */}
       {activeLocation && (
-        <div className="absolute top-3 left-3 z-[500] bg-white/90 backdrop-blur-sm border border-stone-200 rounded-lg px-3 py-2 shadow-sm pointer-events-none">
-          <div className="font-mono text-[9px] tracking-[0.2em] text-stone-400 uppercase">
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-[500] bg-white/95 backdrop-blur-sm border border-stone-200 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 shadow-sm pointer-events-none">
+          <div className="font-mono text-[8px] sm:text-[9px] tracking-[0.2em] text-stone-400 uppercase">
             Active Zone
           </div>
-          <div className="text-xs font-bold" style={{ color: activeLocation.color }}>
+          <div className="text-xs sm:text-sm font-bold" style={{ color: activeLocation.color }}>
             {activeLocation.name}
           </div>
         </div>
       )}
 
-      {/* Coordinates */}
+      {/* Coordinates - Smaller on mobile */}
       {activeLocation && (
-        <div className="absolute bottom-3 right-3 z-[500] font-mono text-[9px] text-stone-400 bg-white/80 backdrop-blur-sm border border-stone-200 rounded px-2 py-1 pointer-events-none">
+        <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-[500] font-mono text-[8px] sm:text-[9px] text-stone-400 bg-white/90 backdrop-blur-sm border border-stone-200 rounded px-1.5 py-1 sm:px-2 sm:py-1 pointer-events-none">
           {activeLocation.coords[0].toFixed(3)}°N ·{" "}
           {Math.abs(activeLocation.coords[1]).toFixed(3)}°W
         </div>
