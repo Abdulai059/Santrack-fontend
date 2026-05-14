@@ -157,8 +157,8 @@ export default function MapView({
 
       {/* Map */}
       <MapContainer
-        center={[7.9465, -1.0232]}
-        zoom={7}
+        center={[9.4034, -0.8424]} // Tamale, Northern Region
+        zoom={13}
         className="w-full h-full z-0"
         zoomControl={false}
         attributionControl={false}
