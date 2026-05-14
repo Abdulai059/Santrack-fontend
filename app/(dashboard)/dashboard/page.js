@@ -119,7 +119,7 @@ export default function DashboardHomePage() {
             <div className="flex-1 relative">
               <MapView
                 locations={[]}
-                activeLocation={{ id: "default", name: "Tamale", coords: [9.4034, -0.8424], color: "#00cc66" }}
+                activeLocation={{ id: "default", name: "Ghana", coords: [7.9465, -1.0232], color: "#00cc66" }}
                 onSelectLocation={() => {}}
                 communities={[]}
                 fieldWorkers={[]}

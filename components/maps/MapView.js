@@ -157,8 +157,8 @@ export default function MapView({
 
       {/* Map */}
       <MapContainer
-        center={[9.4034, -0.8424]} // Tamale, Northern Region
-        zoom={13}
+        center={[7.9465, -1.0232]} // Ghana center - country-wide view
+        zoom={7}
         className="w-full h-full z-0"
         zoomControl={false}
         attributionControl={false}
