@@ -1,6 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
 // Custom Hooks
@@ -8,21 +10,23 @@ import { useMapData } from "@/hooks/useMapData";
 import { useRealtimeSubscriptions } from "@/hooks/useRealtimeSubscriptions";
 import { useGPSTracking } from "@/hooks/useGPSTracking";
 import { useMapsUI } from "@/hooks/useMapsUI";
+import { useUserRoute } from "@/hooks/useUserRoute";
 
-// Components
+// Layout Components
 import MapHeader from "@/components/maps/MapHeader";
+import MapFooter from "@/components/maps/MapFooter";
+import MapLoadingScreen from "@/components/maps/MapLoadingScreen";
+import MapRightPanel from "@/components/maps/MapRightPanel";
+
+// Desktop Components
+import LocationSlugs from "@/components/maps/LocationSlugs";
+
+// Mobile Components
 import MobileControls from "@/components/maps/MobileControls";
 import MobileLocationsOverlay from "@/components/maps/MobileLocationsOverlay";
 import MobileIncidentsOverlay from "@/components/maps/MobileIncidentsOverlay";
 import MobileWorkersOverlay from "@/components/maps/MobileWorkersOverlay";
-import LocationSlugs from "@/components/maps/LocationSlugs";
-import IncidentsPanel from "@/components/maps/IncidentsPanel";
-import LiveTrackingPanel from "@/components/maps/LiveTrackingPanel";
-import MapFooter from "@/components/maps/MapFooter";
 import WorkersFab from "@/components/maps/WorkersFab";
-
-// Constants
-import { PANEL_TYPES } from "@/lib/mapConstants";
 
 // Leaflet must be client-only
 const MapView = dynamic(() => import("@/components/maps/MapView"), {
@@ -34,76 +38,85 @@ const MapView = dynamic(() => import("@/components/maps/MapView"), {
   ),
 });
 
+/**
+ * Reads ?lat=&lng=&name= from the URL and flies the map to that location.
+ * Must be wrapped in <Suspense> because useSearchParams() opts out of SSR.
+ */
+function DeepLinkHandler({ setActiveLocation }) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const lat  = parseFloat(searchParams.get("lat"));
+    const lng  = parseFloat(searchParams.get("lng"));
+    const name = searchParams.get("name");
+
+    if (!isNaN(lat) && !isNaN(lng)) {
+      setActiveLocation({
+        id:     `shared-${lat}-${lng}`,
+        name:   name ? decodeURIComponent(name) : "Shared Location",
+        coords: [lat, lng],
+        color:  "#4285F4",
+      });
+    }
+  }, [searchParams, setActiveLocation]);
+
+  return null;
+}
+
 export default function MapsPage() {
   const { profile } = useAuth();
 
-  // Custom hooks for data management
   const {
-    locations,
-    setLocations,
-    communities,
-    geofences,
-    recentIncidents,
-    setRecentIncidents,
-    fieldWorkers,
-    setFieldWorkers,
-    activeLocation,
-    setActiveLocation,
+    locations, setLocations,
+    communities, geofences,
+    recentIncidents, setRecentIncidents,
+    fieldWorkers, setFieldWorkers,
+    activeLocation, setActiveLocation,
     loading,
   } = useMapData();
 
-  // Realtime subscriptions
   useRealtimeSubscriptions(setLocations, setRecentIncidents, setFieldWorkers);
 
-  // GPS tracking
-  const { isTracking, handleStartTracking, handleStopTracking } = useGPSTracking(profile);
+  const { isTracking, latestPosition, handleStartTracking, handleStopTracking } = useGPSTracking(profile);
 
-  // UI state management
+  // User route tracking (blue path like Google Maps)
+  const { userRoute, currentPosition } = useUserRoute(profile?.id, isTracking, latestPosition);
+
   const {
-    activeLayers,
-    handleToggleLayer,
-    rightPanel,
-    setRightPanel,
-    showLocations,
-    setShowLocations,
-    showIncidents,
-    setShowIncidents,
-    showWorkers,
-    setShowWorkers,
+    activeLayers, handleToggleLayer,
+    rightPanel, setRightPanel,
+    showLocations, setShowLocations,
+    showIncidents, setShowIncidents,
+    showWorkers, setShowWorkers,
   } = useMapsUI();
 
-  // Worker selection handler
   const handleSelectWorker = (worker) => {
-    setActiveLocation({
-      id: worker.id,
-      name: worker.name,
-      coords: worker.coords,
-      color: "#10b981",
-    });
+    setActiveLocation({ id: worker.id, name: worker.name, coords: worker.coords, color: "#10b981" });
   };
 
-  // Loading screen
-  if (loading || !activeLocation) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-white">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="font-mono text-sm text-stone-400">Loading map data...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading || !activeLocation) return <MapLoadingScreen />;
 
   return (
     <div className="flex flex-col h-screen bg-white text-gray-900 font-['Syne',sans-serif] overflow-hidden">
-      {/* Header */}
-      <MapHeader
-        rightPanel={rightPanel}
-        setRightPanel={setRightPanel}
-        fieldWorkers={fieldWorkers}
-      />
 
-      {/* Mobile Controls */}
+      {/* Deep-link handler — reads ?lat=&lng=&name= from URL */}
+      <Suspense fallback={null}>
+        <DeepLinkHandler setActiveLocation={setActiveLocation} />
+      </Suspense>
+
+      {/* Header slides in from top */}
+      <div className="animate-slide-in-top">
+        <MapHeader
+          rightPanel={rightPanel}
+          setRightPanel={setRightPanel}
+          fieldWorkers={fieldWorkers}
+          locations={locations}
+          communities={communities}
+          onSelectLocation={setActiveLocation}
+          activeLocation={activeLocation}
+        />
+      </div>
+
       <MobileControls
         locations={locations}
         recentIncidents={recentIncidents}
@@ -119,10 +132,9 @@ export default function MapsPage() {
         profile={profile}
       />
 
-      {/* Main Content */}
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Desktop left sidebar — locations */}
-        <div className="hidden lg:flex">
+
+        <div className="hidden lg:flex animate-slide-in-left">
           <LocationSlugs
             locations={locations}
             activeLocation={activeLocation}
@@ -130,15 +142,11 @@ export default function MapsPage() {
           />
         </div>
 
-        {/* Mobile Overlays */}
         <MobileLocationsOverlay
           isVisible={showLocations}
           locations={locations}
           activeLocation={activeLocation}
-          onSelectLocation={(loc) => {
-            setActiveLocation(loc);
-            setShowLocations(false);
-          }}
+          onSelectLocation={(loc) => { setActiveLocation(loc); setShowLocations(false); }}
           onClose={() => setShowLocations(false)}
         />
 
@@ -146,10 +154,7 @@ export default function MapsPage() {
           isVisible={showIncidents}
           incidents={recentIncidents}
           locations={locations}
-          onSelectIncident={(loc) => {
-            setActiveLocation(loc);
-            setShowIncidents(false);
-          }}
+          onSelectIncident={(loc) => { setActiveLocation(loc); setShowIncidents(false); }}
           onClose={() => setShowIncidents(false)}
         />
 
@@ -157,14 +162,10 @@ export default function MapsPage() {
           isVisible={showWorkers}
           workers={fieldWorkers}
           currentUserId={profile?.id}
-          onSelectWorker={(worker) => {
-            handleSelectWorker(worker);
-            setShowWorkers(false);
-          }}
+          onSelectWorker={(worker) => { handleSelectWorker(worker); setShowWorkers(false); }}
           onClose={() => setShowWorkers(false)}
         />
 
-        {/* Map */}
         <MapView
           locations={locations}
           activeLocation={activeLocation}
@@ -175,38 +176,39 @@ export default function MapsPage() {
           geofences={geofences}
           activeLayers={activeLayers}
           onToggleLayer={handleToggleLayer}
+          userRoute={userRoute}
+          currentPosition={currentPosition}
+          isTracking={isTracking}
+          currentUserId={profile?.id}
         />
 
-        {/* Desktop right sidebar */}
-        <div className="hidden lg:flex">
-          {rightPanel === PANEL_TYPES.INCIDENTS ? (
-            <IncidentsPanel
-              incidents={recentIncidents}
-              locations={locations}
-              onSelectLocation={setActiveLocation}
-            />
-          ) : (
-            <LiveTrackingPanel
-              workers={fieldWorkers}
-              isTracking={isTracking}
-              onStartTracking={handleStartTracking}
-              onStopTracking={handleStopTracking}
-              onSelectWorker={handleSelectWorker}
-              currentUserId={profile?.id}
-            />
-          )}
+        <div className="panel-enter">
+          <MapRightPanel
+            rightPanel={rightPanel}
+            incidents={recentIncidents}
+            locations={locations}
+            fieldWorkers={fieldWorkers}
+            isTracking={isTracking}
+            currentUserId={profile?.id}
+            onSelectLocation={setActiveLocation}
+            onStartTracking={handleStartTracking}
+            onStopTracking={handleStopTracking}
+            onSelectWorker={handleSelectWorker}
+          />
         </div>
 
-        {/* Floating Action Button */}
         <WorkersFab
           fieldWorkers={fieldWorkers}
           onClick={() => setShowWorkers(true)}
           isVisible={!showWorkers && !showLocations && !showIncidents}
         />
+
       </div>
 
-      {/* Footer */}
-      <MapFooter activeLocation={activeLocation} />
+      <div className="animate-slide-in-bottom">
+        <MapFooter activeLocation={activeLocation} />
+      </div>
+
     </div>
   );
 }

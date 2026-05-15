@@ -3,7 +3,6 @@ import {
   fetchLocations,
   fetchRecentIncidents,
   subscribeToReports,
-  subscribeToAlerts,
 } from "@/lib/mapService";
 import { subscribeToFieldWorkers } from "@/lib/trackingService";
 
@@ -25,11 +24,6 @@ export function useRealtimeSubscriptions(setLocations, setRecentIncidents, setFi
       setRecentIncidents(incidents);
     });
 
-    // Subscribe to alerts
-    const alertsSub = subscribeToAlerts(async () => {
-      setRecentIncidents(await fetchRecentIncidents());
-    });
-
     // Subscribe to field workers
     const workersSub = subscribeToFieldWorkers((workers) => {
       setFieldWorkers(workers);
@@ -38,7 +32,6 @@ export function useRealtimeSubscriptions(setLocations, setRecentIncidents, setFi
     // Cleanup subscriptions on unmount
     return () => {
       reportsSub.unsubscribe();
-      alertsSub.unsubscribe();
       workersSub.unsubscribe();
     };
   }, [setLocations, setRecentIncidents, setFieldWorkers]);

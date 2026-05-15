@@ -82,14 +82,14 @@ export default function Topbar({ activeNav, onNavChange }) {
                       text-sm font-medium transition-all duration-200
                       ${
                         active
-                          ? "bg-brand-soft text-white shadow-sm"
+                          ? "bg-brand-highlight text-gray-900  shadow-sm"
                           : "text-stone-500 hover:bg-brand-soft-highlight hover:text-stone-900"
                       }
                     `}
                   >
                     <Icon
                       className={`w-4 h-4 shrink-0 ${
-                        active ? "text-emerald-400" : ""
+                        active ? "text-gray-400" : ""
                       }`}
                     />
 

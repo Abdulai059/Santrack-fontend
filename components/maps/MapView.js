@@ -7,6 +7,7 @@ import {
   Marker,
   Popup,
   Circle,
+  Polyline,
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
@@ -97,6 +98,23 @@ function FlyTo({ coords, zoom = 14 }) {
   return null;
 }
 
+/* ── Smooth pan to live position (no zoom change) ──────────────────────────── */
+function PanToLive({ coords }) {
+  const map = useMap();
+  const prev = useRef(null);
+
+  useEffect(() => {
+    if (!coords) return;
+    const key = `${coords[0].toFixed(5)},${coords[1].toFixed(5)}`;
+    if (key === prev.current) return;
+    prev.current = key;
+    // panTo is smooth and doesn't change zoom — exactly like Google Maps
+    map.panTo(coords, { animate: true, duration: 0.8, easeLinearity: 0.5 });
+  }, [coords, map]);
+
+  return null;
+}
+
 /* ── Main component ────────────────────────────────────────────────────────── */
 export default function MapView({
   // infrastructure (locations table)
@@ -113,6 +131,11 @@ export default function MapView({
   // layer visibility
   activeLayers,
   onToggleLayer,
+  // user tracking route
+  userRoute = [],
+  currentPosition = null,
+  isTracking = false,
+  currentUserId = null,
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -130,7 +153,7 @@ export default function MapView({
 
       {/* Active zone badge - Smaller on mobile */}
       {activeLocation && (
-        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-[500] bg-white/95 backdrop-blur-sm border border-stone-200 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 shadow-sm pointer-events-none">
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-[500] bg-white/95 backdrop-blur-sm border border-stone-200 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 shadow-sm pointer-events-none animate-scale-in">
           <div className="font-mono text-[8px] sm:text-[9px] tracking-[0.2em] text-stone-400 uppercase">
             Active Zone
           </div>
@@ -142,7 +165,7 @@ export default function MapView({
 
       {/* Coordinates - Smaller on mobile */}
       {activeLocation && (
-        <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-[500] font-mono text-[8px] sm:text-[9px] text-stone-400 bg-white/90 backdrop-blur-sm border border-stone-200 rounded px-1.5 py-1 sm:px-2 sm:py-1 pointer-events-none">
+        <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-[500] font-mono text-[8px] sm:text-[9px] text-stone-400 bg-white/90 backdrop-blur-sm border border-stone-200 rounded px-1.5 py-1 sm:px-2 sm:py-1 pointer-events-none animate-slide-in-bottom">
           {activeLocation.coords[0].toFixed(3)}°N ·{" "}
           {Math.abs(activeLocation.coords[1]).toFixed(3)}°W
         </div>
@@ -166,6 +189,11 @@ export default function MapView({
         <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
 
         {activeLocation && <FlyTo coords={activeLocation.coords} />}
+
+        {/* ── Auto-follow live position while tracking ── */}
+        {isTracking && currentPosition && (
+          <PanToLive coords={[currentPosition.latitude, currentPosition.longitude]} />
+        )}
 
         {/* ── Infrastructure layer ── */}
         {activeLayers.infrastructure &&
@@ -192,9 +220,25 @@ export default function MapView({
                       {loc.incidents}
                     </span>
                   </div>
-                  {loc.district && (
+                  {loc.communityName && (
                     <div className="font-mono text-[10px] text-stone-400 mt-0.5">
+                      {loc.communityName}
+                    </div>
+                  )}
+                  {loc.district && (
+                    <div className="font-mono text-[10px] text-stone-400">
                       {loc.district}, {loc.region}
+                    </div>
+                  )}
+                  {loc.climateRisk && (
+                    <div className="font-mono text-[10px] mt-1 pt-1 border-t border-stone-100">
+                      <span className="text-stone-400">Climate Risk: </span>
+                      <span className="font-bold text-amber-600">{loc.climateRisk}</span>
+                    </div>
+                  )}
+                  {loc.waterAccess === false && (
+                    <div className="font-mono text-[10px] text-red-600 mt-0.5">
+                      ⚠️ Limited Water Access
                     </div>
                   )}
                 </div>
@@ -216,6 +260,17 @@ export default function MapView({
                   <div className="font-mono text-[10px] text-stone-400 mb-2">
                     {c.district} · {c.region}
                   </div>
+                  {c.climateStatus && (
+                    <div className="font-mono text-[10px] mb-1">
+                      <span className="text-stone-400">Status: </span>
+                      <span className={`font-bold ${
+                        c.climateStatus === 'stable' ? 'text-green-600' : 
+                        c.climateStatus === 'at_risk' ? 'text-amber-600' : 'text-red-600'
+                      }`}>
+                        {c.climateStatus.replace('_', ' ').toUpperCase()}
+                      </span>
+                    </div>
+                  )}
                   {c.floodRisk && (
                     <div className="font-mono text-[10px]">
                       <span className="text-stone-400">Flood risk: </span>
@@ -271,6 +326,159 @@ export default function MapView({
             </Marker>
           ))}
 
+        {/* ── User Tracking Route (Google Maps style) ── */}
+        {userRoute.length > 1 && (
+          <>
+            {/* Outer glow — wide, very transparent */}
+            <Polyline
+              positions={userRoute}
+              pathOptions={{
+                color: "#4285F4",
+                weight: 14,
+                opacity: 0.12,
+                lineCap: "round",
+                lineJoin: "round",
+              }}
+            />
+            {/* Main route line */}
+            <Polyline
+              positions={userRoute}
+              pathOptions={{
+                color: "#4285F4",
+                weight: 5,
+                opacity: 0.85,
+                lineCap: "round",
+                lineJoin: "round",
+              }}
+            />
+            {/* White border underneath for contrast */}
+            <Polyline
+              positions={userRoute}
+              pathOptions={{
+                color: "#ffffff",
+                weight: 8,
+                opacity: 0.5,
+                lineCap: "round",
+                lineJoin: "round",
+              }}
+            />
+
+            {/* Route start — green dot */}
+            <Circle
+              center={userRoute[0]}
+              radius={6}
+              pathOptions={{
+                color: "#ffffff",
+                fillColor: "#34A853",
+                fillOpacity: 1,
+                weight: 2,
+              }}
+            />
+          </>
+        )}
+
+        {/* ── Live position marker (Google Maps blue dot) ── */}
+        {isTracking && currentPosition && (() => {
+          const liveCoords = [currentPosition.latitude, currentPosition.longitude];
+          const accuracy   = currentPosition.accuracy ?? 20;
+          const heading    = currentPosition.heading;
+
+          // Heading arrow SVG (only shown when heading is known)
+          const hasHeading = heading !== null && heading !== undefined && !isNaN(heading);
+          const headingArrowSvg = hasHeading
+            ? `<div style="
+                position:absolute;
+                top:50%;left:50%;
+                width:0;height:0;
+                transform:translate(-50%,-50%) rotate(${heading}deg);
+                pointer-events:none;
+              ">
+                <div style="
+                  width:0;height:0;
+                  border-left:6px solid transparent;
+                  border-right:6px solid transparent;
+                  border-bottom:18px solid rgba(66,133,244,0.7);
+                  transform:translateX(-50%) translateY(-100%);
+                  margin-left:50%;
+                "></div>
+              </div>`
+            : "";
+
+          // Pulsing blue dot icon
+          const dotIcon = L.divIcon({
+            html: `
+              <div style="position:relative;width:22px;height:22px;">
+                <!-- Pulse ring -->
+                <div style="
+                  position:absolute;inset:-8px;
+                  border-radius:50%;
+                  background:rgba(66,133,244,0.2);
+                  animation:livePulse 2s ease-out infinite;
+                "></div>
+                <!-- White border -->
+                <div style="
+                  position:absolute;inset:0;
+                  border-radius:50%;
+                  background:#ffffff;
+                  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+                "></div>
+                <!-- Blue fill -->
+                <div style="
+                  position:absolute;inset:3px;
+                  border-radius:50%;
+                  background:#4285F4;
+                "></div>
+                ${headingArrowSvg}
+              </div>`,
+            className: "",
+            iconSize: [22, 22],
+            iconAnchor: [11, 11],
+            popupAnchor: [0, -14],
+          });
+
+          return (
+            <>
+              {/* Accuracy circle */}
+              <Circle
+                center={liveCoords}
+                radius={Math.max(accuracy, 10)}
+                pathOptions={{
+                  color: "#4285F4",
+                  fillColor: "#4285F4",
+                  fillOpacity: 0.08,
+                  weight: 1,
+                  dashArray: "4 3",
+                }}
+              />
+
+              {/* Live dot marker */}
+              <Marker position={liveCoords} icon={dotIcon} zIndexOffset={1000}>
+                <Popup offset={[0, -14]}>
+                  <div className="bg-white border border-stone-200 rounded-lg p-3 min-w-[140px] shadow-md">
+                    <div className="text-xs font-bold text-blue-600 mb-1">
+                      📍 Your Location
+                    </div>
+                    <div className="font-mono text-[10px] text-stone-500 space-y-0.5">
+                      <div>{liveCoords[0].toFixed(5)}°N</div>
+                      <div>{Math.abs(liveCoords[1]).toFixed(5)}°W</div>
+                      {accuracy && (
+                        <div className="text-stone-400">
+                          Accuracy: ±{accuracy.toFixed(0)}m
+                        </div>
+                      )}
+                      {currentPosition.speed > 0.5 && (
+                        <div className="text-emerald-600 font-semibold">
+                          {(currentPosition.speed * 3.6).toFixed(1)} km/h
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            </>
+          );
+        })()}
+
         {/* ── Geofences layer ── */}
         {activeLayers.geofences &&
           geofences.map((g) => (
@@ -301,7 +509,7 @@ export default function MapView({
           ))}
       </MapContainer>
 
-      {/* Leaflet z-index fix */}
+      {/* Leaflet z-index fix + live pulse keyframe */}
       <style jsx global>{`
         .leaflet-container { z-index: 0 !important; }
         .leaflet-pane, .leaflet-top, .leaflet-bottom, .leaflet-control { z-index: 0 !important; }
@@ -311,6 +519,12 @@ export default function MapView({
           box-shadow: none !important;
         }
         .leaflet-popup-content { margin: 0 !important; }
+
+        @keyframes livePulse {
+          0%   { transform: scale(1);   opacity: 0.6; }
+          70%  { transform: scale(2.8); opacity: 0; }
+          100% { transform: scale(2.8); opacity: 0; }
+        }
       `}</style>
     </div>
   );

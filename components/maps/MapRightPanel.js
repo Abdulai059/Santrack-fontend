@@ -1,0 +1,41 @@
+import IncidentsPanel from "@/components/maps/IncidentsPanel";
+import LiveTrackingPanel from "@/components/maps/LiveTrackingPanel";
+import { PANEL_TYPES } from "@/lib/mapConstants";
+
+/**
+ * Right panel component for desktop view
+ * Switches between Incidents and Field Workers panels
+ */
+export default function MapRightPanel({
+  rightPanel,
+  incidents,
+  locations,
+  fieldWorkers,
+  isTracking,
+  currentUserId,
+  onSelectLocation,
+  onStartTracking,
+  onStopTracking,
+  onSelectWorker,
+}) {
+  return (
+    <div className="hidden lg:flex">
+      {rightPanel === PANEL_TYPES.INCIDENTS ? (
+        <IncidentsPanel
+          incidents={incidents}
+          locations={locations}
+          onSelectLocation={onSelectLocation}
+        />
+      ) : (
+        <LiveTrackingPanel
+          workers={fieldWorkers}
+          isTracking={isTracking}
+          onStartTracking={onStartTracking}
+          onStopTracking={onStopTracking}
+          onSelectWorker={onSelectWorker}
+          currentUserId={currentUserId}
+        />
+      )}
+    </div>
+  );
+}

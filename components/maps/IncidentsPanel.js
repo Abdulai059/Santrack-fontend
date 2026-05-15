@@ -3,25 +3,27 @@
 const severityConfig = {
   high: {
     dot: "#ff4444",
-    bg: "rgba(255,68,68,0.06)",
-    border: "rgba(255,68,68,0.18)",
+    bgClass: "bg-rose-100",
+    borderClass: "border-gray-300",
     label: "HIGH",
-    labelColor: "#ff4444",
+    labelColor: "text-red-600",
   },
   medium: {
     dot: "#ffaa00",
-    bg: "rgba(255,170,0,0.06)",
-    border: "rgba(255,170,0,0.18)",
+    bgClass: "bg-brand-highlight",
+    borderClass: "border-gray-300",
     label: "MED",
-    labelColor: "#ffaa00",
+    labelColor: "text-amber-600",
   },
   low: {
     dot: "#00cc66",
-    bg: "rgba(0,204,102,0.06)",
-    border: "rgba(0,204,102,0.18)",
+    bgClass: "bg-brand-primary",
+    borderClass: "border-emerald-200",
     label: "LOW",
-    labelColor: "#00cc66",
+    labelColor: "text-emerald-600",
   },
+
+   
 };
 
 export default function IncidentsPanel({
@@ -33,6 +35,23 @@ export default function IncidentsPanel({
     const loc = locations.find((l) => l.id === inc.locationId);
     if (loc) onSelectLocation(loc);
   }
+
+  // Sort incidents by time (most recent first) - extra safety
+  const sortedIncidents = [...incidents].sort((a, b) => {
+    // Parse time strings like "2m ago", "1h ago", "3d ago"
+    const getMinutes = (timeStr) => {
+      if (timeStr === "Just now") return 0;
+      const match = timeStr.match(/(\d+)([mhd])/);
+      if (!match) return 999999;
+      const [, num, unit] = match;
+      const value = parseInt(num);
+      if (unit === 'm') return value;
+      if (unit === 'h') return value * 60;
+      if (unit === 'd') return value * 1440;
+      return 999999;
+    };
+    return getMinutes(a.time) - getMinutes(b.time);
+  });
 
   return (
     <aside className="w-64 shrink-0 bg-white border-l border-gray-200 flex flex-col overflow-y-auto">
@@ -48,15 +67,25 @@ export default function IncidentsPanel({
 
       {/* List */}
       <div className="flex flex-col gap-2 p-3 flex-1 sh">
-        {incidents.map((inc) => {
+        {sortedIncidents.map((inc, index) => {
           const s = severityConfig[inc.severity];
+          const isNewest = index === 0; // First item is newest
+          
           return (
             <button
               key={inc.id}
               onClick={() => handleClick(inc)}
-              className="w-full text-left rounded-lg border shadow-sm p-3 transition-all duration-150 hover:-translate-x-0.5 hover:brightness-95 cursor-pointer"
-              style={{ background: s.bg, borderColor: s.border }}
+              className={`w-full text-left rounded-lg border shadow-sm p-3 transition-all duration-150 hover:-translate-x-0.5 hover:brightness-95 cursor-pointer ${s.bgClass} ${s.borderClass} ${isNewest ? 'ring-1 shadow-lg ring-gray-100' : ''}`}
             >
+              {/* New badge for most recent */}
+              {isNewest && (
+                <div className="flex items-center gap-1 mb-1">
+                  <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-300 text-white">
+                    New
+                  </span>
+                </div>
+              )}
+              
               {/* Top row */}
               <div className="flex items-start gap-2 mb-1.5">
                 <span className="mt-0.5 relative flex h-2 w-2 shrink-0">
@@ -73,21 +102,37 @@ export default function IncidentsPanel({
                   {inc.title}
                 </span>
                 <span
-                  className="font-mono text-[9px] font-semibold shrink-0 mt-0.5"
-                  style={{ color: s.labelColor }}
+                  className={`font-mono text-[9px] font-semibold shrink-0 mt-0.5 ${s.labelColor}`}
                 >
                   {s.label}
                 </span>
               </div>
 
               {/* Meta row */}
-              <div className="flex items-center justify-between pl-4">
-                <span className="font-mono text-[13px] text-gray-500 truncate max-w-25">
-                  {inc.location}
-                </span>
-                <span className="font-mono text-[13px] text-gray-500">
-                  {inc.time}
-                </span>
+              <div className="pl-4 space-y-0.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[13px] text-gray-500 truncate max-w-25">
+                    {inc.location}
+                  </span>
+                  <span className={`font-mono text-[13px] font-semibold ${isNewest ? 'text-emerald-600' : 'text-gray-500'}`}>
+                    {inc.time}
+                  </span>
+                </div>
+                {inc.referenceId && (
+                  <div className="font-mono text-[10px] text-gray-400">
+                    Ref: {inc.referenceId}
+                  </div>
+                )}
+                {inc.healthRisk && (
+                  <div className="font-mono text-[10px] text-red-600">
+                    ⚠️ Health Risk
+                  </div>
+                )}
+                {inc.affectedPeople && (
+                  <div className="font-mono text-[10px] text-gray-500">
+                    {inc.affectedPeople} people affected
+                  </div>
+                )}
               </div>
             </button>
           );
