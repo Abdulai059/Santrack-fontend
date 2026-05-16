@@ -12,7 +12,11 @@ import { subscribeToFieldWorkers } from "@/lib/trackingService";
  * @param {Function} setRecentIncidents - State setter for incidents
  * @param {Function} setFieldWorkers - State setter for field workers
  */
-export function useRealtimeSubscriptions(setLocations, setRecentIncidents, setFieldWorkers) {
+export function useRealtimeSubscriptions(
+  setLocations,
+  setRecentIncidents,
+  setFieldWorkers,
+) {
   useEffect(() => {
     // Subscribe to sanitation reports
     const reportsSub = subscribeToReports(async () => {

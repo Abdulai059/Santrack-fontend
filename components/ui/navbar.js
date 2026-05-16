@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 const NAV_ITEMS = [
-  { id: "map", label: "Map", icon: Map, href: "/maps" },
+  { id: "map", label: "Map", icon: Map, href: null },
   { id: "reports", label: "Reports", icon: ClipboardList, href: "/reports" },
   { id: "analytics", label: "Analytics", icon: BarChart3, href: "/analytics" },
   { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
@@ -45,9 +45,7 @@ export default function Topbar({ activeNav, onNavChange }) {
     <>
       <header className="fixed top-0 inset-x-0 z-50 border-b border-stone-200/70 bg-white/85 backdrop-blur-xl">
         <div className="h-16 max-w-[98rem] mx-auto px-4 md:px-6 flex items-center justify-between gap-4">
-          {/* LEFT SIDE */}
           <div className="flex items-center gap-5 min-w-0">
-            {/* LOGO */}
             <Link href="/" className="flex items-center gap-3 shrink-0 group">
               <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 transition-transform duration-200 group-hover:scale-105">
                 <Droplets className="w-5 h-5 text-white" />
@@ -64,49 +62,66 @@ export default function Topbar({ activeNav, onNavChange }) {
               </div>
             </Link>
 
-            {/* DIVIDER */}
             <div className="hidden lg:block w-px h-7 bg-stone-200" />
 
-            {/* NAVIGATION */}
             <nav className="hidden md:flex items-center gap-1">
               {NAV_ITEMS.map(({ id, label, icon: Icon, href }) => {
+                const isMap = id === "map";
                 const active = activeNav === id;
 
-                return (
-                  <Link
-                    key={id}
-                    href={href}
-                    onClick={() => onNavChange?.(id)}
-                    className={`
-                      relative flex items-center gap-2 rounded-xl px-4 py-2
-                      text-sm font-medium transition-all duration-200
-                      ${
-                        active
-                          ? "bg-brand-highlight text-gray-900  shadow-sm"
-                          : "text-stone-500 hover:bg-brand-soft-highlight hover:text-stone-900"
-                      }
-                    `}
-                  >
-                    <Icon
-                      className={`w-4 h-4 shrink-0 ${
-                        active ? "text-gray-400" : ""
-                      }`}
-                    />
+                const baseClass =
+                  "relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200";
 
+                const stateClass = isMap
+                  ? active
+                    ? "bg-brand-soft-highlight text-gray-900 shadow-sm"
+                    : "bg-brand-soft-highlight text-gray-900"
+                  : active
+                    ? "bg-brand-highlight text-gray-900 shadow-sm"
+                    : "text-stone-500 hover:bg-brand-soft-highlight hover:text-stone-900";
+
+                const className = `${baseClass} ${stateClass}`;
+
+                const content = (
+                  <>
+                    <Icon className="w-4 h-4 shrink-0" />
                     <span>{label}</span>
 
                     {active && (
                       <span className="absolute inset-x-3 -bottom-[9px] h-[2px] rounded-full bg-emerald-500" />
                     )}
+                  </>
+                );
+
+                // ✅ MAP = BUTTON (NO ROUTE)
+                if (isMap) {
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => onNavChange?.(id)}
+                      className={className}
+                    >
+                      {content}
+                    </button>
+                  );
+                }
+
+                // ✅ OTHERS = LINKS
+                return (
+                  <Link
+                    key={id}
+                    href={href}
+                    onClick={() => onNavChange?.(id)}
+                    className={className}
+                  >
+                    {content}
                   </Link>
                 );
               })}
             </nav>
           </div>
 
-          {/* RIGHT SIDE */}
           <div className="flex items-center gap-2">
-            {/* SEARCH */}
             <div className="hidden lg:flex items-center gap-2 h-10 w-64 rounded-xl border border-stone-200 bg-stone-50/80 px-3 transition-all focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-500/10">
               <Search className="w-4 h-4 text-stone-400 shrink-0" />
 
@@ -117,16 +132,13 @@ export default function Topbar({ activeNav, onNavChange }) {
               />
             </div>
 
-            {/* NOTIFICATIONS */}
             <button className="relative flex items-center justify-center w-10 h-10 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition-colors">
               <Bell className="w-4 h-4 text-stone-600" />
 
               <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 border border-white" />
             </button>
 
-            {/* AUTH SECTION */}
             {isAuthenticated ? (
-              /* PROFILE CHIP (desktop) */
               <div className="relative hidden sm:block">
                 <button
                   onClick={() => setProfileOpen((o) => !o)}
@@ -154,7 +166,6 @@ export default function Topbar({ activeNav, onNavChange }) {
                   />
                 </button>
 
-                {/* Dropdown */}
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-stone-200 bg-white shadow-xl shadow-stone-900/10 py-2 z-50">
                     <div className="px-4 py-2 border-b border-stone-100 mb-1">
@@ -178,7 +189,6 @@ export default function Topbar({ activeNav, onNavChange }) {
                 )}
               </div>
             ) : (
-              /* GUEST BUTTONS */
               <div className="hidden sm:flex items-center gap-2 pl-1">
                 <Link
                   href="/login"
@@ -196,7 +206,6 @@ export default function Topbar({ activeNav, onNavChange }) {
               </div>
             )}
 
-            {/* MOBILE MENU */}
             <button
               onClick={() => setMobileOpen((o) => !o)}
               className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition-colors"
@@ -210,35 +219,44 @@ export default function Topbar({ activeNav, onNavChange }) {
           </div>
         </div>
 
-        {/* MOBILE DRAWER */}
         {mobileOpen && (
           <div className="md:hidden border-t border-stone-200 bg-white px-4 py-3 flex flex-col gap-1">
-            {/* Nav items */}
             {NAV_ITEMS.map(({ id, label, icon: Icon, href }) => {
               const active = activeNav === id;
-              return (
-                <Link
-                  key={id}
-                  href={href}
-                  onClick={() => {
-                    onNavChange?.(id);
-                    setMobileOpen(false);
-                  }}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-brand-soft text-white"
-                      : "text-stone-600 hover:bg-brand-soft-highlight hover:text-stone-900"
-                  }`}
-                >
+              const commonClass = `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                active
+                  ? "bg-brand-soft text-white"
+                  : "text-stone-600 hover:bg-brand-soft-highlight hover:text-stone-900"
+              }`;
+              const handleClick = () => {
+                onNavChange?.(id);
+                setMobileOpen(false);
+              };
+              const content = (
+                <>
                   <Icon
                     className={`w-4 h-4 shrink-0 ${active ? "text-emerald-400" : ""}`}
                   />
                   {label}
+                </>
+              );
+
+              return href ? (
+                <Link
+                  key={id}
+                  href={href}
+                  onClick={handleClick}
+                  className={commonClass}
+                >
+                  {content}
                 </Link>
+              ) : (
+                <button key={id} onClick={handleClick} className={commonClass}>
+                  {content}
+                </button>
               );
             })}
 
-            {/* Mobile auth */}
             <div className="border-t border-stone-100 mt-2 pt-2">
               {isAuthenticated ? (
                 <>
@@ -292,7 +310,6 @@ export default function Topbar({ activeNav, onNavChange }) {
         )}
       </header>
 
-      {/* Click-outside overlay for profile dropdown */}
       {profileOpen && (
         <div
           className="fixed inset-0 z-40"

@@ -17,6 +17,8 @@ export default function MapRightPanel({
   onStartTracking,
   onStopTracking,
   onSelectWorker,
+  severityFilter,
+  setSeverityFilter,
 }) {
   return (
     <div className="hidden lg:flex">
@@ -25,6 +27,8 @@ export default function MapRightPanel({
           incidents={incidents}
           locations={locations}
           onSelectLocation={onSelectLocation}
+          severityFilter={severityFilter}
+          setSeverityFilter={setSeverityFilter}
         />
       ) : (
         <LiveTrackingPanel

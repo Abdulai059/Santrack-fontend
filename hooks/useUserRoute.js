@@ -16,10 +16,10 @@ import { fetchUserLocationHistory } from "@/lib/trackingService";
  * @returns {{ userRoute: Array, currentPosition: Object|null }}
  */
 export function useUserRoute(userId, isTracking, latestPosition = null) {
-  const [userRoute, setUserRoute]           = useState([]);
+  const [userRoute, setUserRoute] = useState([]);
   const [currentPosition, setCurrentPosition] = useState(null);
   const syncIntervalRef = useRef(null);
-  const lastSyncRef     = useRef(0);
+  const lastSyncRef = useRef(0);
 
   // ── Load history from DB when tracking starts ──────────────────────────
   const loadHistory = useCallback(async () => {

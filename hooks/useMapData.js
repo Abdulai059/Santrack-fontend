@@ -24,7 +24,7 @@ export function useMapData() {
   useEffect(() => {
     async function loadMapData() {
       setLoading(true);
-      
+
       const [locs, incidents, comms, fences, workers] = await Promise.all([
         fetchLocations(),
         fetchRecentIncidents(),

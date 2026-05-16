@@ -21,7 +21,6 @@ export default function DashboardHome() {
 
       <div className="mt-8">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Welcome Card */}
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-6">
               <div className="flex items-center">
@@ -33,19 +32,23 @@ export default function DashboardHome() {
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">Welcome back!</h3>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Welcome back!
+                  </h3>
                   <p className="text-sm text-gray-500">{profile?.email}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Role-based Navigation */}
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Quick Actions
+              </h3>
               <div className="space-y-3">
-                {(profile?.role === "admin" || profile?.role === "operator") && (
+                {(profile?.role === "admin" ||
+                  profile?.role === "operator") && (
                   <Link
                     href="/dashboard/operator"
                     className="block w-full text-left px-3 py-2 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors"
@@ -53,7 +56,8 @@ export default function DashboardHome() {
                     Operator Dashboard
                   </Link>
                 )}
-                {(profile?.role === "admin" || profile?.role === "district_officer") && (
+                {(profile?.role === "admin" ||
+                  profile?.role === "district_officer") && (
                   <Link
                     href="/dashboard/district-officer"
                     className="block w-full text-left px-3 py-2 bg-green-50 text-green-700 rounded-md hover:bg-green-100 transition-colors"
@@ -81,22 +85,29 @@ export default function DashboardHome() {
             </div>
           </div>
 
-          {/* Stats Card */}
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">System Status</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                System Status
+              </h3>
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">Authentication</span>
-                  <span className="text-sm font-medium text-green-600">Active</span>
+                  <span className="text-sm font-medium text-green-600">
+                    Active
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">Role Access</span>
-                  <span className="text-sm font-medium text-green-600">Configured</span>
+                  <span className="text-sm font-medium text-green-600">
+                    Configured
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">Database</span>
-                  <span className="text-sm font-medium text-green-600">Connected</span>
+                  <span className="text-sm font-medium text-green-600">
+                    Connected
+                  </span>
                 </div>
               </div>
             </div>

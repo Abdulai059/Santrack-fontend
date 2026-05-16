@@ -11,7 +11,7 @@ import { startTracking } from "@/lib/trackingService";
  * @returns {{ isTracking, latestPosition, handleStartTracking, handleStopTracking }}
  */
 export function useGPSTracking(profile) {
-  const [isTracking, setIsTracking]       = useState(false);
+  const [isTracking, setIsTracking] = useState(false);
   const [latestPosition, setLatestPosition] = useState(null);
   const trackerRef = useRef(null);
 
@@ -33,7 +33,7 @@ export function useGPSTracking(profile) {
       onError: (err) => {
         console.error("GPS Error:", err);
         alert(
-          "Location permission denied or GPS unavailable. Please enable location services."
+          "Location permission denied or GPS unavailable. Please enable location services.",
         );
       },
     });

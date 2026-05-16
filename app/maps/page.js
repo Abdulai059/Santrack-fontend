@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
@@ -46,16 +46,16 @@ function DeepLinkHandler({ setActiveLocation }) {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const lat  = parseFloat(searchParams.get("lat"));
-    const lng  = parseFloat(searchParams.get("lng"));
+    const lat = parseFloat(searchParams.get("lat"));
+    const lng = parseFloat(searchParams.get("lng"));
     const name = searchParams.get("name");
 
     if (!isNaN(lat) && !isNaN(lng)) {
       setActiveLocation({
-        id:     `shared-${lat}-${lng}`,
-        name:   name ? decodeURIComponent(name) : "Shared Location",
+        id: `shared-${lat}-${lng}`,
+        name: name ? decodeURIComponent(name) : "Shared Location",
         coords: [lat, lng],
-        color:  "#4285F4",
+        color: "#4285F4",
       });
     }
   }, [searchParams, setActiveLocation]);
@@ -67,45 +67,69 @@ export default function MapsPage() {
   const { profile } = useAuth();
 
   const {
-    locations, setLocations,
-    communities, geofences,
-    recentIncidents, setRecentIncidents,
-    fieldWorkers, setFieldWorkers,
-    activeLocation, setActiveLocation,
+    locations,
+    setLocations,
+    communities,
+    geofences,
+    recentIncidents,
+    setRecentIncidents,
+    fieldWorkers,
+    setFieldWorkers,
+    activeLocation,
+    setActiveLocation,
     loading,
   } = useMapData();
 
   useRealtimeSubscriptions(setLocations, setRecentIncidents, setFieldWorkers);
 
-  const { isTracking, latestPosition, handleStartTracking, handleStopTracking } = useGPSTracking(profile);
+  const {
+    isTracking,
+    latestPosition,
+    handleStartTracking,
+    handleStopTracking,
+  } = useGPSTracking(profile);
 
   // User route tracking (blue path like Google Maps)
-  const { userRoute, currentPosition } = useUserRoute(profile?.id, isTracking, latestPosition);
+  const { userRoute, currentPosition } = useUserRoute(
+    profile?.id,
+    isTracking,
+    latestPosition,
+  );
 
   const {
-    activeLayers, handleToggleLayer,
-    rightPanel, setRightPanel,
-    showLocations, setShowLocations,
-    showIncidents, setShowIncidents,
-    showWorkers, setShowWorkers,
+    activeLayers,
+    handleToggleLayer,
+    rightPanel,
+    setRightPanel,
+    showLocations,
+    setShowLocations,
+    showIncidents,
+    setShowIncidents,
+    showWorkers,
+    setShowWorkers,
   } = useMapsUI();
 
+  const [severityFilter, setSeverityFilter] = useState("all");
+
   const handleSelectWorker = (worker) => {
-    setActiveLocation({ id: worker.id, name: worker.name, coords: worker.coords, color: "#10b981" });
+    setActiveLocation({
+      id: worker.id,
+      name: worker.name,
+      coords: worker.coords,
+      color: "#10b981",
+    });
   };
 
   if (loading || !activeLocation) return <MapLoadingScreen />;
 
   return (
-    <div className="flex flex-col h-screen bg-white text-gray-900 font-['Syne',sans-serif] overflow-hidden">
-
+    <div className="flex flex-col h-screen max-w-[98rem] mx-auto bg-white text-gray-900 font-['Syne',sans-serif] overflow-hidden">
       {/* Deep-link handler — reads ?lat=&lng=&name= from URL */}
       <Suspense fallback={null}>
         <DeepLinkHandler setActiveLocation={setActiveLocation} />
       </Suspense>
 
-      {/* Header slides in from top */}
-      <div className="animate-slide-in-top">
+      <div className="animate-slide-in-top relative z-[9999]">
         <MapHeader
           rightPanel={rightPanel}
           setRightPanel={setRightPanel}
@@ -114,26 +138,31 @@ export default function MapsPage() {
           communities={communities}
           onSelectLocation={setActiveLocation}
           activeLocation={activeLocation}
+          severityFilter={severityFilter}
+          setSeverityFilter={setSeverityFilter}
         />
       </div>
 
-      <MobileControls
-        locations={locations}
-        recentIncidents={recentIncidents}
-        fieldWorkers={fieldWorkers}
-        activeLocation={activeLocation}
-        showLocations={showLocations}
-        setShowLocations={setShowLocations}
-        showIncidents={showIncidents}
-        setShowIncidents={setShowIncidents}
-        isTracking={isTracking}
-        onStartTracking={handleStartTracking}
-        onStopTracking={handleStopTracking}
-        profile={profile}
-      />
+      <div className="relative z-[9999]">
+        <MobileControls
+          locations={locations}
+          recentIncidents={recentIncidents}
+          fieldWorkers={fieldWorkers}
+          activeLocation={activeLocation}
+          showLocations={showLocations}
+          setShowLocations={setShowLocations}
+          showIncidents={showIncidents}
+          setShowIncidents={setShowIncidents}
+          isTracking={isTracking}
+          onStartTracking={handleStartTracking}
+          onStopTracking={handleStopTracking}
+          profile={profile}
+          severityFilter={severityFilter}
+          setSeverityFilter={setSeverityFilter}
+        />
+      </div>
 
       <div className="flex flex-1 overflow-hidden relative">
-
         <div className="hidden lg:flex animate-slide-in-left">
           <LocationSlugs
             locations={locations}
@@ -146,7 +175,10 @@ export default function MapsPage() {
           isVisible={showLocations}
           locations={locations}
           activeLocation={activeLocation}
-          onSelectLocation={(loc) => { setActiveLocation(loc); setShowLocations(false); }}
+          onSelectLocation={(loc) => {
+            setActiveLocation(loc);
+            setShowLocations(false);
+          }}
           onClose={() => setShowLocations(false)}
         />
 
@@ -154,15 +186,22 @@ export default function MapsPage() {
           isVisible={showIncidents}
           incidents={recentIncidents}
           locations={locations}
-          onSelectIncident={(loc) => { setActiveLocation(loc); setShowIncidents(false); }}
+          onSelectIncident={(loc) => {
+            setActiveLocation(loc);
+            setShowIncidents(false);
+          }}
           onClose={() => setShowIncidents(false)}
+          severityFilter={severityFilter}
         />
 
         <MobileWorkersOverlay
           isVisible={showWorkers}
           workers={fieldWorkers}
           currentUserId={profile?.id}
-          onSelectWorker={(worker) => { handleSelectWorker(worker); setShowWorkers(false); }}
+          onSelectWorker={(worker) => {
+            handleSelectWorker(worker);
+            setShowWorkers(false);
+          }}
           onClose={() => setShowWorkers(false)}
         />
 
@@ -193,6 +232,8 @@ export default function MapsPage() {
             onSelectLocation={setActiveLocation}
             onStartTracking={handleStartTracking}
             onStopTracking={handleStopTracking}
+            severityFilter={severityFilter}
+            setSeverityFilter={setSeverityFilter}
             onSelectWorker={handleSelectWorker}
           />
         </div>
@@ -202,13 +243,11 @@ export default function MapsPage() {
           onClick={() => setShowWorkers(true)}
           isVisible={!showWorkers && !showLocations && !showIncidents}
         />
-
       </div>
 
       <div className="animate-slide-in-bottom">
         <MapFooter activeLocation={activeLocation} />
       </div>
-
     </div>
   );
 }

@@ -14,16 +14,20 @@ export function useMapsUI() {
 
   const handleToggleLayer = (key) => {
     setActiveLayers((prev) => ({ ...prev, [key]: !prev[key] }));
-    
+
     // Sync right panel with layer toggles
     if (key === "incidents") {
       setRightPanel((prev) =>
-        prev === PANEL_TYPES.INCIDENTS ? PANEL_TYPES.TRACKING : PANEL_TYPES.INCIDENTS
+        prev === PANEL_TYPES.INCIDENTS
+          ? PANEL_TYPES.TRACKING
+          : PANEL_TYPES.INCIDENTS,
       );
     }
     if (key === "fieldWorkers") {
       setRightPanel((prev) =>
-        prev === PANEL_TYPES.TRACKING ? PANEL_TYPES.INCIDENTS : PANEL_TYPES.TRACKING
+        prev === PANEL_TYPES.TRACKING
+          ? PANEL_TYPES.INCIDENTS
+          : PANEL_TYPES.TRACKING,
       );
     }
   };

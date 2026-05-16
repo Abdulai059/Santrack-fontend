@@ -71,17 +71,18 @@ export default function DashboardHomePage() {
   return (
     <div className="p-6 h-screen flex flex-col overflow-hidden">
       <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col overflow-hidden">
-        {/* Welcome Section */}
         <div className="mb-6 shrink-0">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Welcome back, {profile?.email?.split("@")[0]}!
           </h1>
           <p className="text-gray-600">
-            Role: <span className="font-semibold capitalize">{profile?.role?.replace("_", " ")}</span>
+            Role:{" "}
+            <span className="font-semibold capitalize">
+              {profile?.role?.replace("_", " ")}
+            </span>
           </p>
         </div>
 
-        {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 shrink-0">
           <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
             <div className="text-2xl font-bold text-gray-900">24</div>
@@ -101,41 +102,63 @@ export default function DashboardHomePage() {
           </div>
         </div>
 
-        {/* Map Preview - Takes remaining space */}
         <div className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mb-6">
           <div className="h-full flex flex-col">
             <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between shrink-0">
-              <h2 className="text-lg font-semibold text-gray-900">Live Sanitation Map</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Live Sanitation Map
+              </h2>
               <Link
                 href="/maps"
                 className="text-sm font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
               >
                 Full Screen
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
                 </svg>
               </Link>
             </div>
             <div className="flex-1 relative">
               <MapView
                 locations={[]}
-                activeLocation={{ id: "default", name: "Ghana", coords: [7.9465, -1.0232], color: "#00cc66" }}
+                activeLocation={{
+                  id: "default",
+                  name: "Ghana",
+                  coords: [7.9465, -1.0232],
+                  color: "#00cc66",
+                }}
                 onSelectLocation={() => {}}
                 communities={[]}
                 fieldWorkers={[]}
                 onSelectWorker={() => {}}
                 geofences={[]}
-                activeLayers={{ infrastructure: true, communities: true, incidents: true, fieldWorkers: true, geofences: true }}
+                activeLayers={{
+                  infrastructure: true,
+                  communities: true,
+                  incidents: true,
+                  fieldWorkers: true,
+                  geofences: true,
+                }}
                 onToggleLayer={() => {}}
               />
             </div>
           </div>
         </div>
 
-        {/* Role-Based Dashboard Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 shrink-0">
           {roleCards.map((card, index) => {
-            const shouldShow = !card.showFor || card.showFor.includes(profile?.role);
+            const shouldShow =
+              !card.showFor || card.showFor.includes(profile?.role);
             if (!shouldShow) return null;
 
             return (
@@ -144,7 +167,9 @@ export default function DashboardHomePage() {
                 href={card.href}
                 className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
               >
-                <div className={`w-10 h-10 ${card.color} rounded-lg flex items-center justify-center mb-3`}>
+                <div
+                  className={`w-10 h-10 ${card.color} rounded-lg flex items-center justify-center mb-3`}
+                >
                   <span className="text-xl">{card.icon}</span>
                 </div>
                 <h3 className="text-sm font-semibold text-gray-900 mb-1">

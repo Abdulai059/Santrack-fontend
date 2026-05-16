@@ -26,16 +26,27 @@ export default function MobileWorkersOverlay({
           onClick={onClose}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors active:scale-95"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 divide-x divide-gray-100 border-b border-gray-100 shrink-0 bg-gray-50">
         <div className="py-3 text-center">
-          <div className="text-xl font-bold text-stone-800">{workers.length}</div>
+          <div className="text-xl font-bold text-stone-800">
+            {workers.length}
+          </div>
           <div className="font-mono text-[10px] text-stone-400 uppercase tracking-wide">
             Total Active
           </div>
@@ -53,7 +64,12 @@ export default function MobileWorkersOverlay({
       <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2.5">
         {workers.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-stone-300 gap-3 py-12">
-            <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-16 h-16"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -95,7 +111,6 @@ export default function MobileWorkersOverlay({
                     </span>
                   </div>
 
-                  {/* Moving indicator */}
                   <div className="shrink-0 mt-1">
                     {worker.isMoving ? (
                       <span className="flex items-center gap-1.5 text-xs text-emerald-600 font-semibold">
@@ -111,7 +126,6 @@ export default function MobileWorkersOverlay({
                   </div>
                 </div>
 
-                {/* Meta */}
                 <div className="flex items-center justify-between text-xs text-stone-500 font-mono mb-2">
                   <span>{worker.lastSeen}</span>
                   {worker.speed > 0.5 && (
@@ -121,9 +135,9 @@ export default function MobileWorkersOverlay({
                   )}
                 </div>
 
-                {/* Coords */}
                 <div className="pt-2 border-t border-stone-100 font-mono text-[10px] text-stone-400 truncate">
-                  📍 {worker.coords[0].toFixed(5)}, {worker.coords[1].toFixed(5)}
+                  📍 {worker.coords[0].toFixed(5)},{" "}
+                  {worker.coords[1].toFixed(5)}
                 </div>
               </button>
             );

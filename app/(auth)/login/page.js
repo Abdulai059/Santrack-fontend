@@ -61,12 +61,10 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative">
-      {/* Blur Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 backdrop-blur-sm">
         <div className="absolute inset-0 bg-black/20 backdrop-blur-md"></div>
       </div>
 
-      {/* Modal */}
       <div className="relative z-10 w-full max-w-md mx-4">
         <div
           ref={modalRef}
@@ -74,7 +72,6 @@ export default function LoginPage() {
             isOpen ? "scale-100 opacity-100" : "scale-95 opacity-0"
           }`}
         >
-          {/* Logo/Header */}
           <div className="flex justify-between items-start mb-8">
             <div className="text-center flex-1">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4">
@@ -118,7 +115,6 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Form */}
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
               <label
@@ -185,7 +181,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Footer */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{" "}
