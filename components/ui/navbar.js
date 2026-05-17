@@ -17,6 +17,9 @@ import {
   UserCircle2,
   X,
 } from "lucide-react";
+import Modal from "./Modal";
+import LoginPage from "@/app/(auth)/login/page";
+import SignUpPage from "@/app/(auth)/signup/page";
 
 const NAV_ITEMS = [
   { id: "map", label: "Map", icon: Map, href: null },
@@ -203,19 +206,21 @@ export default function Topbar({ activeNav, onNavChange }) {
               </div>
             ) : (
               <div className="hidden sm:flex items-center gap-2 pl-1">
-                <Link
-                  href="/login"
-                  className={`${buttonStyles} bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-900`}
-                >
-                  Sign In
-                </Link>
+                <Modal>
+                  <Modal.Open opens="sign-in">
+                    <button className={`${buttonStyles} bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-900`}>
+                      Login
+                    </button>
+                  </Modal.Open>
 
-                <Link
-                  href="/signup"
-                  className="px-4 py-2 rounded-xl hover:bg-brand-soft text-gray-900 text-sm font-medium bg-brand-soft-highlight transition-colors shadow-sm"
-                >
-                  Sign Up
-                </Link>
+                  <Modal.Window name="sign-in">
+                    <LoginPage />
+                  </Modal.Window>
+
+                  <Modal.Window name="sign-up">
+                    <SignUpPage />
+                  </Modal.Window>
+                </Modal>
               </div>
             )}
 
