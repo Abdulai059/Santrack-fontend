@@ -127,9 +127,7 @@ export default function AdminPanel() {
                     >
                       <option value="admin">Admin</option>
                       <option value="operator">Operator</option>
-                      <option value="district_officer">
-                        District Officer
-                      </option>
+                      <option value="district_officer">District Officer</option>
                       <option value="ngo">NGO</option>
                     </select>
                   </td>

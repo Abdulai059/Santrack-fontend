@@ -104,3 +104,196 @@ body {
   color: var(--text-primary);
   font-family: var(--font-geist-sans), "DM Sans", sans-serif;
 }
+
+/* Mobile touch improvements */
+@media (max-width: 768px) {
+  /* Improve tap targets */
+  button,
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Smooth scrolling on mobile */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent text selection on buttons */
+  button {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+}
+
+/* Custom utility classes */
+.active\:scale-98:active {
+  transform: scale(0.98);
+}
+
+/* ── Map UI Animations ──────────────────────────────────────────────────────── */
+
+/* Fade + slide in from top */
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade + slide in from bottom */
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade + slide in from left */
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Fade + slide in from right */
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Gentle scale-in for cards / panels */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Shimmer for loading skeletons */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Radar pulse for live tracking dot */
+@keyframes radarPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  70% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* Utility classes */
+.animate-slide-in-top {
+  animation: slideInFromTop 0.25s ease both;
+}
+.animate-slide-in-bottom {
+  animation: slideInFromBottom 0.25s ease both;
+}
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.3s ease both;
+}
+.animate-slide-in-right {
+  animation: slideInFromRight 0.3s ease both;
+}
+.animate-scale-in {
+  animation: scaleIn 0.2s ease both;
+}
+
+/* Staggered children — add to parent, children get delay via nth-child */
+.stagger-children > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.stagger-children > *:nth-child(2) {
+  animation-delay: 60ms;
+}
+.stagger-children > *:nth-child(3) {
+  animation-delay: 120ms;
+}
+.stagger-children > *:nth-child(4) {
+  animation-delay: 180ms;
+}
+.stagger-children > *:nth-child(5) {
+  animation-delay: 240ms;
+}
+.stagger-children > *:nth-child(6) {
+  animation-delay: 300ms;
+}
+.stagger-children > *:nth-child(7) {
+  animation-delay: 360ms;
+}
+.stagger-children > *:nth-child(8) {
+  animation-delay: 420ms;
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+/* Radar pulse ring (used on live tracking indicator) */
+.radar-pulse::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: currentColor;
+  animation: radarPulse 1.8s ease-out infinite;
+}
+
+/* Smooth panel transitions */
+.panel-enter {
+  animation: slideInFromRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Tailwind animate-in helpers (used in MapHeader dropdown) */
+.animate-in {
+  animation-fill-mode: both;
+}
+.fade-in {
+  animation-name: scaleIn;
+  animation-duration: 0.15s;
+}
+.slide-in-from-top-1 {
+  animation-name: slideInFromTop;
+  animation-duration: 0.15s;
+}

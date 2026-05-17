@@ -105,50 +105,83 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-white">
-      {/* ── LEFT — Form ── */}
-      <div className="flex flex-col justify-center w-full lg:w-1/2 px-8 sm:px-16 xl:px-24 py-12">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 mb-12 group w-fit">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md shadow-emerald-500/20 transition-transform duration-200 group-hover:scale-105">
-            <Droplets className="w-4 h-4 text-white" />
+    <div className="min-h-screen flex items-center justify-center relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 backdrop-blur-sm">
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-md"></div>
+      </div>
+
+      <div className="relative z-10 w-full max-w-md mx-4">
+        <div
+          ref={modalRef}
+          className={`bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8 transform transition-all duration-300 ${
+            isOpen ? "scale-100 opacity-100" : "scale-95 opacity-0"
+          }`}
+        >
+          <div className="flex justify-between items-start mb-8">
+            <div className="text-center flex-1">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full mb-4">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zm-7 7a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Create Account
+              </h2>
+              <p className="text-gray-600 mt-2">Join SaniTrack today</p>
+            </div>
+            <button
+              onClick={closeModal}
+              className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-lg hover:bg-gray-100"
+              aria-label="Close modal"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
           </div>
-          <span className="text-lg font-bold text-stone-900">
-            Sani<span className="text-emerald-600">Track</span>
-          </span>
-        </Link>
 
-        {/* Heading */}
-        <h1 className="text-3xl font-extrabold text-stone-900 mb-2">Create an account</h1>
-        <p className="text-stone-500 text-sm mb-10">
-          Join SaniTrack and start monitoring sanitation incidents today.
-        </p>
+          <form className="space-y-6" onSubmit={handleSignUp}>
+            <div>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                htmlFor="email"
+              >
+                Email Address
+              </label>
+              <input
+                type="email"
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/70 backdrop-blur-sm transition-all duration-200"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
 
-        {/* Form */}
-        <form onSubmit={handleSignUp} className="space-y-5">
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1.5">
-              Email address
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-            />
-          </div>
-
-          {/* Password */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-stone-700 mb-1.5">
-              Password
-            </label>
-            <div className="relative">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -159,11 +192,48 @@ export default function SignUpPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 pr-11 rounded-xl border border-stone-200 bg-stone-50 text-stone-900 placeholder:text-stone-400 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
-                aria-label={showPassword ? "Hide password" : "Show password"}
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 transition-all duration-200"
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Creating account...
+                </div>
+              ) : (
+                "Sign Up"
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Already have an account?{" "}
+              <a
+                href="/login"
+                className="font-medium text-purple-600 hover:text-purple-500 transition-colors"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
