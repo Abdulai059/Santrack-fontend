@@ -21,7 +21,12 @@ import {
 const NAV_ITEMS = [
   { id: "map", label: "Map", icon: Map, href: null },
   { id: "reports", label: "Reports", icon: ClipboardList, href: "/reports" },
-  { id: "analytics", label: "Analytics", icon: BarChart3, href: "/analytics" },
+  {
+    id: "ChildSafety",
+    label: "Safety Child",
+    icon: BarChart3,
+    href: "/child-safety",
+  },
   {
     id: "Safety Tips",
     label: "Safety Tips 🧼",
