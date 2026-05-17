@@ -3,6 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import MapsPage from "@/app/maps/page";
 
 // Import map dynamically (client-side only)
 const MapView = dynamic(() => import("@/components/maps/MapView"), {
@@ -102,56 +103,9 @@ export default function DashboardHomePage() {
           </div>
         </div>
 
-        <div className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mb-6">
-          <div className="h-full flex flex-col">
-            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between shrink-0">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Live Sanitation Map
-              </h2>
-              <Link
-                href="/maps"
-                className="text-sm font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
-              >
-                Full Screen
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
-              </Link>
-            </div>
-            <div className="flex-1 relative">
-              <MapView
-                locations={[]}
-                activeLocation={{
-                  id: "default",
-                  name: "Ghana",
-                  coords: [7.9465, -1.0232],
-                  color: "#00cc66",
-                }}
-                onSelectLocation={() => {}}
-                communities={[]}
-                fieldWorkers={[]}
-                onSelectWorker={() => {}}
-                geofences={[]}
-                activeLayers={{
-                  infrastructure: true,
-                  communities: true,
-                  incidents: true,
-                  fieldWorkers: true,
-                  geofences: true,
-                }}
-                onToggleLayer={() => {}}
-              />
-            </div>
+        <div className="h-[90vh] bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mb-6">
+          <div>
+            <MapsPage />
           </div>
         </div>
 

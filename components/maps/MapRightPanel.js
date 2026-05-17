@@ -15,6 +15,13 @@ export default function MapRightPanel({
   onSelectWorker,
   severityFilter,
   setSeverityFilter,
+  onSelectIncident,
+  selectedIncident,
+  togglePinLocation,
+  pinnedLocation,
+  onStartNavigation,
+  onStopNavigation,
+  navigationDestination,
 }) {
   return (
     <div className="hidden lg:flex h-full">
@@ -25,6 +32,13 @@ export default function MapRightPanel({
           onSelectLocation={onSelectLocation}
           severityFilter={severityFilter}
           setSeverityFilter={setSeverityFilter}
+          onSelectIncident={onSelectIncident}
+          selectedIncident={selectedIncident}
+          togglePinLocation={togglePinLocation}
+          pinnedLocation={pinnedLocation}
+          onStartNavigation={onStartNavigation}
+          onStopNavigation={onStopNavigation}
+          navigationDestination={navigationDestination}
         />
       ) : (
         <LiveTrackingPanel

@@ -1,6 +1,7 @@
 "use client";
 
 import { INCIDENT_SEVERITY_CONFIG } from "@/lib/mapConstants.js";
+import { MapPin, Navigation } from "lucide-react";
 
 const formatIssueType = (issueType) => {
   if (!issueType) return "Sanitation Issue";
@@ -31,6 +32,11 @@ export default function MobileIncidentsOverlay({
   onSelectIncident,
   onClose,
   severityFilter = "all",
+  togglePinLocation,
+  pinnedLocation,
+  onStartNavigation,
+  onStopNavigation,
+  navigationDestination,
 }) {
   if (!isVisible) return null;
 
@@ -99,13 +105,13 @@ export default function MobileIncidentsOverlay({
               inc.communities?.name ||
               "Unknown Location";
             return (
-              <button
+              <div
                 key={inc.id}
                 onClick={() => {
                   const loc = locations.find((l) => l.id === inc.location_id);
                   if (loc) onSelectIncident(loc);
                 }}
-                className="w-full text-left rounded-xl border shadow-sm p-3.5 transition-all duration-150 hover:brightness-95 active:scale-98"
+                className="w-full text-left rounded-xl border shadow-sm p-3.5 transition-all duration-150 hover:brightness-95 active:scale-98 cursor-pointer"
                 style={{ background: s.bg, borderColor: s.border }}
               >
                 <div className="flex items-start gap-2.5 mb-2">
@@ -122,16 +128,62 @@ export default function MobileIncidentsOverlay({
                   <span className="text-base font-semibold text-gray-700 leading-tight flex-1">
                     {formatIssueType(inc.issue_type)}
                   </span>
-                  <span
-                    className="font-mono text-[10px] font-bold shrink-0 mt-0.5 px-2 py-1 rounded-full"
-                    style={{
-                      color: s.lc,
-                      background: `${s.lc}15`,
-                      border: `1px solid ${s.lc}30`,
-                    }}
-                  >
-                    {s.label}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <span
+                      className="font-mono text-[10px] font-bold shrink-0 mt-0.5 px-2 py-1 rounded-full"
+                      style={{
+                        color: s.lc,
+                        background: `${s.lc}15`,
+                        border: `1px solid ${s.lc}30`,
+                      }}
+                    >
+                      {s.label}
+                    </span>
+                    {togglePinLocation && inc.locations && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePinLocation(inc.locations);
+                        }}
+                        className={`p-1 rounded transition-colors ${
+                          pinnedLocation?.id === inc.locations.id
+                            ? "text-emerald-600 bg-emerald-50"
+                            : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                        }`}
+                        title={
+                          pinnedLocation?.id === inc.locations.id
+                            ? "Unpin location"
+                            : "Pin location"
+                        }
+                      >
+                        <MapPin className="h-3 w-3" />
+                      </button>
+                    )}
+                    {onStartNavigation && inc.locations && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (navigationDestination?.id === inc.locations.id) {
+                            onStopNavigation();
+                          } else {
+                            onStartNavigation(inc.locations);
+                          }
+                        }}
+                        className={`p-1.5 rounded-full transition-colors ${
+                          navigationDestination?.id === inc.locations.id
+                            ? "text-blue-600 bg-blue-50"
+                            : "text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                        }`}
+                        title={
+                          navigationDestination?.id === inc.locations.id
+                            ? "Stop navigation"
+                            : "Navigate to location"
+                        }
+                      >
+                        <Navigation className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center justify-between pl-5">
                   <span className="font-mono text-xs text-gray-500 truncate">
@@ -141,7 +193,7 @@ export default function MobileIncidentsOverlay({
                     {getTimeAgo(inc.created_at)}
                   </span>
                 </div>
-              </button>
+              </div>
             );
           })
         )}

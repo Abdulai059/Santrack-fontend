@@ -6,11 +6,12 @@ import {
   Clock3,
   ChevronDown,
   ChevronUp,
-  CheckCircle2,
-  Loader2,
-  UserCheck,
+  MapPin,
+  Navigation,
 } from "lucide-react";
 import { useState } from "react";
+
+/* ─── Config ───────────────────────────────────────────────────────────────── */
 
 const severityConfig = {
   critical: {
@@ -43,21 +44,28 @@ const severityConfig = {
   },
 };
 
-// Renamed to statusConfig to avoid collision with incident.status field
-const statusConfig = {
-  pending: { icon: Clock3, label: "Pending", className: "text-amber-600" },
-  assigned: { icon: UserCheck, label: "Assigned", className: "text-sky-600" },
-  in_progress: {
-    icon: Loader2,
-    label: "In Progress",
-    className: "text-blue-600",
-  },
-  resolved: {
-    icon: CheckCircle2,
-    label: "Resolved",
-    className: "text-emerald-600",
-  },
+/* ─── Helpers ──────────────────────────────────────────────────────────────── */
+
+const formatIssueType = (type) => {
+  if (!type) return "Sanitation Issue";
+  return type
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 };
+
+const getTimeAgo = (timestamp) => {
+  const diffMs = Date.now() - new Date(timestamp);
+  const mins = Math.floor(diffMs / 60000);
+  const hours = Math.floor(diffMs / 3600000);
+  const days = Math.floor(diffMs / 86400000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  return `${days}d ago`;
+};
+
+/* ─── Main component ───────────────────────────────────────────────────────── */
 
 export default function IncidentsPanel({
   incidents = [],
@@ -65,6 +73,13 @@ export default function IncidentsPanel({
   onSelectLocation,
   severityFilter = "all",
   setSeverityFilter,
+  onSelectIncident,
+  selectedIncident,
+  togglePinLocation,
+  pinnedLocation,
+  onStartNavigation,
+  onStopNavigation,
+  navigationDestination,
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -78,13 +93,26 @@ export default function IncidentsPanel({
   );
 
   function handleSelectIncident(incident) {
-    const location = locations.find((loc) => loc.id === incident.location_id);
-    if (location) onSelectLocation(location);
+    if (onSelectIncident) {
+      onSelectIncident(incident);
+    } else {
+      // Fallback: fly map to the incident's location
+      const location = locations.find((loc) => loc.id === incident.location_id);
+      if (location) onSelectLocation(location);
+    }
   }
+
+  const cardProps = {
+    togglePinLocation,
+    pinnedLocation,
+    onStartNavigation,
+    onStopNavigation,
+    navigationDestination,
+  };
 
   return (
     <>
-      {/* Mobile: bottom sheet — sits above the map via fixed positioning */}
+      {/* Mobile: bottom sheet */}
       <div className="md:hidden fixed bottom-0 inset-x-0 z-40 rounded-t-2xl shadow-[0_-8px_24px_rgba(0,0,0,0.10)] overflow-hidden">
         <div className="flex justify-center pt-2.5 pb-1 bg-white">
           <div className="h-1 w-10 rounded-full bg-gray-200" />
@@ -122,6 +150,7 @@ export default function IncidentsPanel({
                       handleSelectIncident(incident);
                       setMobileOpen(false);
                     }}
+                    {...cardProps}
                   />
                 ))
               ) : (
@@ -132,8 +161,8 @@ export default function IncidentsPanel({
         )}
       </div>
 
-      {/* Desktop: fixed-height sidebar so the card list scrolls independently */}
-      <aside className="hidden md:flex w-64 shrink-0 flex-col h-full border-l border-gray-200 bg-white">
+      {/* Desktop: pinned sidebar, header stays fixed while cards scroll */}
+      <aside className="hidden md:flex w-70 shrink-0 flex-col h-full border-l border-gray-200 bg-white">
         <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-4 py-3">
           <h2 className="font-mono text-sm uppercase tracking-[0.22em] text-gray-900">
             Recent Incidents
@@ -143,7 +172,6 @@ export default function IncidentsPanel({
           </span>
         </div>
 
-        {/* flex-1 + overflow-y-auto: header stays pinned, cards scroll */}
         <div className="flex-1 overflow-y-auto">
           <div className="flex flex-col gap-2 p-3">
             {sortedIncidents.length > 0 ? (
@@ -153,6 +181,7 @@ export default function IncidentsPanel({
                   incident={incident}
                   isNewest={index === 0}
                   onClick={() => handleSelectIncident(incident)}
+                  {...cardProps}
                 />
               ))
             ) : (
@@ -165,7 +194,18 @@ export default function IncidentsPanel({
   );
 }
 
-function IncidentCard({ incident, isNewest, onClick }) {
+/* ─── Incident card ────────────────────────────────────────────────────────── */
+
+function IncidentCard({
+  incident,
+  isNewest,
+  onClick,
+  togglePinLocation,
+  pinnedLocation,
+  onStartNavigation,
+  onStopNavigation,
+  navigationDestination,
+}) {
   const {
     issue_type,
     severity,
@@ -179,38 +219,30 @@ function IncidentCard({ incident, isNewest, onClick }) {
     communities,
   } = incident;
 
-  const severityConfigItem = severityConfig[severity] || severityConfig.low;
-  const statusItem = statusConfig[status];
-
-  const formatIssueType = (type) => {
-    if (!type) return "Sanitation Issue";
-    return type
-      .split("_")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
-  };
-
-  const getTimeAgo = (timestamp) => {
-    const diffMs = Date.now() - new Date(timestamp);
-    const mins = Math.floor(diffMs / 60000);
-    const hours = Math.floor(diffMs / 3600000);
-    const days = Math.floor(diffMs / 86400000);
-    if (mins < 1) return "Just now";
-    if (mins < 60) return `${mins}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    return `${days}d ago`;
-  };
-
+  const cfg = severityConfig[severity] || severityConfig.low;
   const locationName =
     locations?.name || communities?.name || "Unknown Location";
+  const isPinned = pinnedLocation?.id === locations?.id;
+  const isNavigating = navigationDestination?.id === locations?.id;
+
+  function handlePin(e) {
+    e.stopPropagation();
+    if (locations) togglePinLocation(locations);
+  }
+
+  function handleNavigate(e) {
+    e.stopPropagation();
+    if (!locations) return;
+    isNavigating ? onStopNavigation() : onStartNavigation(locations);
+  }
 
   return (
-    <button
+    <div
       onClick={onClick}
       className={`
-        w-full rounded-xl border p-2.5 md:p-3 text-left shadow-sm
+        w-full rounded-xl border p-2.5 md:p-3 text-left shadow-sm cursor-pointer
         transition-all duration-200 hover:-translate-x-0.5 hover:shadow-md
-        ${severityConfigItem.bgClass} ${severityConfigItem.borderClass}
+        ${cfg.bgClass} ${cfg.borderClass}
         ${isNewest ? "ring-1 ring-gray-100" : ""}
       `}
     >
@@ -222,20 +254,56 @@ function IncidentCard({ incident, isNewest, onClick }) {
         </div>
       )}
 
+      {/* Header row: severity dot + title + actions */}
       <div className="mb-1.5 md:mb-2 flex items-start gap-2">
-        <SeverityDot color={severityConfigItem.color} />
+        <SeverityDot color={cfg.color} />
+
         <div className="min-w-0 flex-1">
           <h3 className="text-[13px] md:text-sm font-semibold leading-tight text-gray-700">
             {formatIssueType(issue_type)}
           </h3>
         </div>
-        <span
-          className={`font-mono text-[9px] font-semibold ${severityConfigItem.textClass}`}
-        >
-          {severityConfigItem.label}
-        </span>
+
+        <div className="flex items-center gap-1 shrink-0">
+          <span
+            className={`font-mono text-[9px] font-semibold ${cfg.textClass}`}
+          >
+            {cfg.label}
+          </span>
+
+          {/* Pin button */}
+          {/* {togglePinLocation && locations && (
+            <button
+              onClick={handlePin}
+              title={isPinned ? "Unpin location" : "Pin location"}
+              className={`p-1 rounded transition-colors ${
+                isPinned
+                  ? "text-emerald-600 bg-emerald-50"
+                  : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <MapPin className="h-3 w-3" />
+            </button>
+          )} */}
+
+          {/* Navigate button */}
+          {onStartNavigation && locations && (
+            <button
+              onClick={handleNavigate}
+              title={isNavigating ? "Stop navigation" : "Navigate to location"}
+              className={`p-1 rounded transition-colors ${
+                isNavigating
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+              }`}
+            >
+              <Navigation className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
+      {/* Detail rows */}
       <div className="space-y-1 pl-4">
         <div className="flex items-center justify-between gap-2">
           <span className="truncate font-mono text-[10px] md:text-[11px] text-gray-500">
@@ -261,13 +329,10 @@ function IncidentCard({ incident, isNewest, onClick }) {
           </p>
         )}
 
-        {statusItem && (
-          <div
-            className={`flex items-center gap-1 text-[9px] md:text-[10px] ${statusItem.className}`}
-          >
-            <statusItem.icon className="h-2.5 w-2.5 md:h-3 md:w-3" />
-            <span className="font-medium">{statusItem.label}</span>
-          </div>
+        {status && (
+          <p className="text-[9px] md:text-[10px] font-medium capitalize text-gray-600">
+            {status}
+          </p>
         )}
 
         {health_risk && (
@@ -284,9 +349,11 @@ function IncidentCard({ incident, isNewest, onClick }) {
           </div>
         )}
       </div>
-    </button>
+    </div>
   );
 }
+
+/* ─── Sub-components ───────────────────────────────────────────────────────── */
 
 function SeverityDot({ color }) {
   return (

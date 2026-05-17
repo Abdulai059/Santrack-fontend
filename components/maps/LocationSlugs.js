@@ -1,12 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { MapPin, Navigation } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export default function LocationSlugs({
   locations = [],
   activeLocation,
   onSelect,
+  togglePinLocation,
+  pinnedLocation,
+  onStartNavigation,
+  onStopNavigation,
+  navigationDestination,
 }) {
   const [images, setImages] = useState({});
 
@@ -103,6 +109,11 @@ export default function LocationSlugs({
               image={image}
               isActive={isActive}
               onClick={() => onSelect(loc)}
+              togglePinLocation={togglePinLocation}
+              pinnedLocation={pinnedLocation}
+              onStartNavigation={onStartNavigation}
+              onStopNavigation={onStopNavigation}
+              navigationDestination={navigationDestination}
             />
           );
         })}
@@ -115,12 +126,22 @@ export default function LocationSlugs({
 /*                                LOCATION CARD                               */
 /* -------------------------------------------------------------------------- */
 
-function LocationCard({ location, image, isActive, onClick }) {
+function LocationCard({
+  location,
+  image,
+  isActive,
+  onClick,
+  togglePinLocation,
+  pinnedLocation,
+  onStartNavigation,
+  onStopNavigation,
+  navigationDestination,
+}) {
   return (
-    <button
+    <div
       onClick={onClick}
       className={`
-        w-full overflow-hidden rounded-lg border text-left transition-all
+        w-full overflow-hidden rounded-lg border text-left transition-all cursor-pointer
         ${
           isActive
             ? "border-slate-300 shadow-md bg-slate-50"
@@ -128,7 +149,6 @@ function LocationCard({ location, image, isActive, onClick }) {
         }
       `}
     >
-      {/* Image */}
       <div className="relative h-28 bg-gray-100 overflow-hidden">
         {image === undefined && <Skeleton />}
 
@@ -144,12 +164,57 @@ function LocationCard({ location, image, isActive, onClick }) {
         {image === null && <LocationPlaceholder location={location} />}
       </div>
 
-      {/* Content */}
       <div className="p-3">
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-sm font-semibold uppercase text-gray-800 line-clamp-2">
             {location.name}
           </h3>
+          <div className="flex items-center gap-1">
+            {togglePinLocation && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  togglePinLocation(location);
+                }}
+                className={`p-1.5 rounded-full transition-colors ${
+                  pinnedLocation?.id === location.id
+                    ? "text-emerald-600 bg-emerald-50"
+                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                }`}
+                title={
+                  pinnedLocation?.id === location.id
+                    ? "Unpin location"
+                    : "Pin location"
+                }
+              >
+                <MapPin className="h-3.5 w-3.5" />
+              </button>
+            )}
+            {onStartNavigation && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (navigationDestination?.id === location.id) {
+                    onStopNavigation();
+                  } else {
+                    onStartNavigation(location);
+                  }
+                }}
+                className={`p-1.5 rounded-full transition-colors ${
+                  navigationDestination?.id === location.id
+                    ? "text-blue-600 bg-blue-50"
+                    : "text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                }`}
+                title={
+                  navigationDestination?.id === location.id
+                    ? "Stop navigation"
+                    : "Navigate to location"
+                }
+              >
+                <Navigation className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         <p className="mt-1 text-[11px] text-gray-400">
@@ -158,7 +223,7 @@ function LocationCard({ location, image, isActive, onClick }) {
           {location.communityName && <> · {location.communityName}</>}
         </p>
       </div>
-    </button>
+    </div>
   );
 }
 

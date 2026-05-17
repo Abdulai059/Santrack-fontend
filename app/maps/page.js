@@ -111,6 +111,12 @@ export default function MapsPage() {
 
   const [severityFilter, setSeverityFilter] = useState("all");
 
+  const [selectedIncident, setSelectedIncident] = useState(null);
+  const [hoveredLocation, setHoveredLocation] = useState(null);
+  const [pinnedLocation, setPinnedLocation] = useState(null);
+  const [navigationDestination, setNavigationDestination] = useState(null);
+  const [navigationRoute, setNavigationRoute] = useState([]);
+
   const handleSelectWorker = (worker) => {
     setActiveLocation({
       id: worker.id,
@@ -120,10 +126,46 @@ export default function MapsPage() {
     });
   };
 
+  const handleSelectIncident = (incident) => {
+    setSelectedIncident(incident);
+    if (incident.locations?.[0]) {
+      setActiveLocation(incident.locations[0]);
+    }
+  };
+
+  const togglePinLocation = (location) => {
+    setPinnedLocation((prev) => (prev?.id === location.id ? null : location));
+  };
+
+  const handleStartNavigation = (location) => {
+    setNavigationDestination(location);
+    if (currentPosition) {
+      setNavigationRoute([
+        [currentPosition.latitude, currentPosition.longitude],
+        location.coords,
+      ]);
+    }
+  };
+
+  const handleStopNavigation = () => {
+    setNavigationDestination(null);
+    setNavigationRoute([]);
+  };
+
+  // Update navigation route as user moves
+  useEffect(() => {
+    if (navigationDestination && currentPosition) {
+      setNavigationRoute([
+        [currentPosition.latitude, currentPosition.longitude],
+        navigationDestination.coords,
+      ]);
+    }
+  }, [currentPosition, navigationDestination]);
+
   if (loading || !activeLocation) return <MapLoadingScreen />;
 
   return (
-    <div className="flex flex-col max-w-392 mx-auto bg-white text-gray-900 font-['Syne',sans-serif] overflow-hidden">
+    <div className="flex flex-col h-[91vh] max-w-392 mx-auto mt-6 bg-white text-gray-900 font-['Syne',sans-serif] overflow-hidden">
       {/* Deep-link handler — reads ?lat=&lng=&name= from URL */}
       <Suspense fallback={null}>
         <DeepLinkHandler setActiveLocation={setActiveLocation} />
@@ -140,6 +182,8 @@ export default function MapsPage() {
           activeLocation={activeLocation}
           severityFilter={severityFilter}
           setSeverityFilter={setSeverityFilter}
+          navigationDestination={navigationDestination}
+          onStopNavigation={handleStopNavigation}
         />
       </div>
 
@@ -168,6 +212,11 @@ export default function MapsPage() {
             locations={locations}
             activeLocation={activeLocation}
             onSelect={setActiveLocation}
+            togglePinLocation={togglePinLocation}
+            pinnedLocation={pinnedLocation}
+            onStartNavigation={handleStartNavigation}
+            onStopNavigation={handleStopNavigation}
+            navigationDestination={navigationDestination}
           />
         </div>
 
@@ -180,6 +229,11 @@ export default function MapsPage() {
             setShowLocations(false);
           }}
           onClose={() => setShowLocations(false)}
+          togglePinLocation={togglePinLocation}
+          pinnedLocation={pinnedLocation}
+          onStartNavigation={handleStartNavigation}
+          onStopNavigation={handleStopNavigation}
+          navigationDestination={navigationDestination}
         />
 
         <MobileIncidentsOverlay
@@ -192,6 +246,11 @@ export default function MapsPage() {
           }}
           onClose={() => setShowIncidents(false)}
           severityFilter={severityFilter}
+          togglePinLocation={togglePinLocation}
+          pinnedLocation={pinnedLocation}
+          onStartNavigation={handleStartNavigation}
+          onStopNavigation={handleStopNavigation}
+          navigationDestination={navigationDestination}
         />
 
         <MobileWorkersOverlay
@@ -219,6 +278,17 @@ export default function MapsPage() {
           currentPosition={currentPosition}
           isTracking={isTracking}
           currentUserId={profile?.id}
+          selectedIncident={selectedIncident}
+          setSelectedIncident={setSelectedIncident}
+          hoveredLocation={hoveredLocation}
+          setHoveredLocation={setHoveredLocation}
+          pinnedLocation={pinnedLocation}
+          setPinnedLocation={setPinnedLocation}
+          togglePinLocation={togglePinLocation}
+          navigationRoute={navigationRoute}
+          navigationDestination={navigationDestination}
+          onStartNavigation={handleStartNavigation}
+          onStopNavigation={handleStopNavigation}
         />
 
         <div className="panel-enter">
@@ -235,6 +305,13 @@ export default function MapsPage() {
             severityFilter={severityFilter}
             setSeverityFilter={setSeverityFilter}
             onSelectWorker={handleSelectWorker}
+            onSelectIncident={handleSelectIncident}
+            selectedIncident={selectedIncident}
+            togglePinLocation={togglePinLocation}
+            pinnedLocation={pinnedLocation}
+            onStartNavigation={handleStartNavigation}
+            onStopNavigation={handleStopNavigation}
+            navigationDestination={navigationDestination}
           />
         </div>
 

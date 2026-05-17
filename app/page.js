@@ -31,7 +31,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#f3f4f6]">
       <Topbar />
-      <main className="flex-1 pt-16">
+      <main className="flex-1 pt-14">
         <MapsPage />
       </main>
     </div>

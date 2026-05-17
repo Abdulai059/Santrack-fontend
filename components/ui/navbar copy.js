@@ -22,12 +22,7 @@ const NAV_ITEMS = [
   { id: "map", label: "Map", icon: Map, href: null },
   { id: "reports", label: "Reports", icon: ClipboardList, href: "/reports" },
   { id: "analytics", label: "Analytics", icon: BarChart3, href: "/analytics" },
-  {
-    id: "Safety Tips",
-    label: "Safety Tips 🧼",
-    icon: Settings,
-    href: "/safety-tips",
-  },
+  { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
 ];
 
 const ROLE_COLORS = {
@@ -36,9 +31,6 @@ const ROLE_COLORS = {
   district_officer: "bg-sky-100 text-sky-700",
   ngo: "bg-amber-100 text-amber-700",
 };
-
-const buttonStyles =
-  "rounded-xl px-4 py-2 text-sm font-medium transition active:scale-95";
 
 export default function Topbar({ activeNav, onNavChange }) {
   const { profile, signOut } = useAuth();
@@ -82,8 +74,8 @@ export default function Topbar({ activeNav, onNavChange }) {
 
                 const stateClass = isMap
                   ? active
-                    ? "bg-brand-primary text-gray-900 shadow-sm"
-                    : "hover:bg-brand-soft-highlight text-gray-900 bg-brand-primary"
+                    ? "bg-brand-soft-highlight text-gray-900 shadow-sm"
+                    : "bg-brand-soft-highlight text-gray-900"
                   : active
                     ? "bg-brand-highlight text-gray-900 shadow-sm"
                     : "text-stone-500 hover:bg-brand-soft-highlight hover:text-stone-900";
@@ -200,14 +192,14 @@ export default function Topbar({ activeNav, onNavChange }) {
               <div className="hidden sm:flex items-center gap-2 pl-1">
                 <Link
                   href="/login"
-                  className={`${buttonStyles} bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-900`}
+                  className="px-4 py-2 rounded-xl text-sm font-medium text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition-colors"
                 >
                   Sign In
                 </Link>
 
                 <Link
                   href="/signup"
-                  className="px-4 py-2 rounded-xl hover:bg-brand-soft text-gray-900 text-sm font-medium bg-brand-soft-highlight transition-colors shadow-sm"
+                  className="px-4 py-2 rounded-xl bg-brand-soft text-gray-900 text-sm font-medium hover:bg-brand-soft-highlight transition-colors shadow-sm"
                 >
                   Sign Up
                 </Link>
@@ -300,7 +292,7 @@ export default function Topbar({ activeNav, onNavChange }) {
                   <Link
                     href="/login"
                     onClick={() => setMobileOpen(false)}
-                    className="w-full text-center rounded-xl px-4 py-2.5 text-sm font-medium border bg-stone-100 border-stone-200 text-stone-700 hover:bg-stone-50 transition-colors"
+                    className="w-full text-center rounded-xl px-4 py-2.5 text-sm font-medium border border-stone-200 text-stone-700 hover:bg-stone-100 transition-colors"
                   >
                     Sign In
                   </Link>
