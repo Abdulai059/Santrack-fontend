@@ -11,7 +11,7 @@
 
 ## Executive Summary
 
-SaniTrack Climate is a geospatial intelligence and incident response platform purpose-built for sanitation infrastructure monitoring in climate-vulnerable regions of Northern Ghana. The system provides district officers, NGO field teams, health authorities, and community agents with a unified operational picture — combining real-time GIS mapping, sanitation incident reporting, climate event tracking, and field worker coordination into a single deployable web application. Designed to operate in low-bandwidth environments and align with UNICEF WASH programme standards, SaniTrack Climate transforms fragmented, paper-based sanitation data into actionable intelligence that protects children's health and strengthens community resilience against floods, droughts, and contamination events.
+Sab'ta Soya Climate is a geospatial intelligence and incident response platform purpose-built for sanitation infrastructure monitoring in climate-vulnerable regions of Northern Ghana. The system provides district officers, NGO field teams, health authorities, and community agents with a unified operational picture — combining real-time GIS mapping, sanitation incident reporting, climate event tracking, and field worker coordination into a single deployable web application. Designed to operate in low-bandwidth environments and align with UNICEF WASH programme standards, SaniTrack Climate transforms fragmented, paper-based sanitation data into actionable intelligence that protects children's health and strengthens community resilience against floods, droughts, and contamination events.
 
 ---
 
